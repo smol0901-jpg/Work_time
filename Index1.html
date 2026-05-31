@@ -1,0 +1,1303 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL_ARCHITECT_PREMIUM++ | Industrial Connect v14.0</title>
+    <style>
+        :root {
+            --ui-bg-main: #0b1329;
+            --ui-bg-panel: #1c2541;
+            --ui-accent: #3a86ff;
+            --ui-accent-hover: #00b4d8;
+            --ui-danger: #d00000;
+            --ui-danger-hover: #ff0000;
+            --ui-success: #0096c7;
+            --ui-text: #edf2f4;
+            --ui-text-muted: #8d99ae;
+            --canvas-bg: #4a5759;
+            --blank-bg: #ffffff;
+            --blank-text: #000000;
+            --blank-weekend-bg: #ffccd5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            display: flex; height: 100vh; background: var(--canvas-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; color: var(--blank-text);
+        }
+        .sidebar {
+            width: 530px; min-width: 530px; background: var(--ui-bg-main); color: var(--ui-text);
+            padding: 15px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+            height: 100vh; border-right: 3px solid #000; box-shadow: 5px 0 25px rgba(0,0,0,0.6);
+            z-index: 100; transition: margin-left 0.25s ease-in-out;
+        }
+        .sidebar.collapsed { margin-left: -530px; }
+        .sidebar h1 {
+            font-size: 0.95rem; font-weight: 900; color: var(--ui-accent-hover);
+            text-transform: uppercase; border-bottom: 2px solid #1c2541; padding-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sidebar h1 span { font-size: 0.6rem; background: #ff007f; padding: 2px 6px; border-radius: 4px; color: #fff; }
+        .config-card {
+            background: var(--ui-bg-panel); border: 1px solid #3a86ff33; border-radius: 6px;
+            padding: 10px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .config-card h3 { margin: 0; font-size: 0.72rem; text-transform: uppercase; color: var(--ui-accent-hover); border-bottom: 1px solid #3a86ff33; padding-bottom: 4px; }
+        .form-group { display: flex; flex-direction: column; gap: 2px; }
+        .form-group label { font-size: 0.6rem; text-transform: uppercase; color: var(--ui-text-muted); font-weight: 700; }
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%; padding: 5px 6px; background: var(--ui-bg-main);
+            border: 1px solid #2b3a67; color: #fff; border-radius: 4px; font-size: 0.75rem;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--ui-accent-hover); }
+        .row-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .row-grid-3 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 4px; }
+        .crud-row {
+            background: rgba(0, 0, 0, 0.25); padding: 6px; border-radius: 4px;
+            border: 1px solid #2b3a67; display: flex; flex-direction: column; gap: 4px; position: relative;
+        }
+        .crud-header-line { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        .bulk-employee-selector {
+            max-height: 110px; overflow-y: auto; background: var(--ui-bg-main);
+            border: 1px solid #2b3a67; border-radius: 4px; padding: 5px; margin-top: 2px;
+        }
+        .bulk-emp-label {
+            display: flex; align-items: center; gap: 6px; font-size: 0.7rem;
+            color: #e2e8f0; padding: 3px 0; cursor: pointer; border-bottom: 1px solid #1c2541;
+        }
+        .bulk-emp-label:last-child { border-bottom: none; }
+        .bulk-emp-label input { cursor: pointer; }
+        .btn {
+            cursor: pointer; padding: 6px 10px; border: none; border-radius: 4px;
+            font-weight: 700; font-size: 0.65rem; text-transform: uppercase;
+            transition: all 0.1s ease; display: inline-flex; justify-content: center; align-items: center; gap: 4px;
+        }
+        .btn-accent { background: var(--ui-accent); color: #fff; width: 100%; }
+        .btn-accent:hover { background: #5195ff; }
+        .btn-success { background: #0096c7; color: #fff; width: 100%; }
+        .btn-success:hover { background: #00b4d8; }
+        .btn-secondary { background: #4a5568; color: #fff; }
+        .btn-secondary:hover { background: #718096; }
+        .btn-danger { background: var(--ui-danger); color: #fff; }
+        .btn-danger:hover { background: var(--ui-danger-hover); }
+        .btn-small { padding: 2px 6px; font-size: 0.6rem; border-radius: 3px; width: auto; height: 18px; }
+        .canvas-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 15px; position: relative; }
+        .canvas-toolbar {
+            position: sticky; top: 0; z-index: 500; background: var(--ui-bg-panel);
+            padding: 8px 15px; border-radius: 6px; border: 1px solid #3a86ff55;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: flex; gap: 10px; align-self: flex-start; flex-wrap: wrap;
+        }
+        .a4-landscape-page {
+            background: var(--blank-bg); color: var(--blank-text); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 297mm; min-width: 297mm; max-width: 297mm;
+            height: 210mm; min-height: 210mm; max-height: 210mm; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            border-left: 5mm solid var(--ui-accent); page-break-after: always; position: relative;
+        }
+        .a4-portrait-page {
+            background: var(--blank-bg); color: var(--blank-text); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 210mm; min-width: 210mm; max-width: 210mm;
+            height: 297mm; min-height: 297mm; max-height: 297mm; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            border-top: 5mm solid var(--ui-accent); page-break-after: always; position: relative;
+        }
+        .analytics-page { border-left-color: #10b981 !important; border-top-color: #10b981 !important; }
+        .schedule-table { width: 100%; border-collapse: collapse; font-size: 7pt; table-layout: fixed; }
+        .schedule-table th, .schedule-table td { 
+            border: 1px solid #000000; text-align: center; vertical-align: middle; 
+            padding: 2px 1px; height: auto; min-height: 20px; max-height: 26px;
+            word-wrap: break-word; word-break: break-all; white-space: normal !important;
+            text-overflow: clip !important; overflow: visible !important;
+            line-height: 1.1;
+        }
+        .schedule-table th { background: #eaedf1; font-weight: bold; color: #000; font-size: 6.5pt; }
+        .col-idx { width: 20px; } 
+        .col-emp { width: 125px; text-align: left !important; padding-left: 3px !important; font-weight: bold; line-height: 9pt; }
+        .col-pos { width: 85px; text-align: left !important; padding-left: 3px !important; color: #334155; line-height: 8.5pt; } 
+        .col-day { width: 20px; cursor: pointer; font-weight: bold; }
+        .col-total { width: 35px; font-weight: bold; background: #f1f5f9; } 
+        .col-night { width: 28px; background: #f8fafc; } 
+        .col-fot { width: 55px; font-weight: bold; background: #e2e8f0; }
+        .hide-col-total .col-total { display: none !important; }
+        .hide-col-night .col-night { display: none !important; }
+        .hide-col-fot .col-fot { display: none !important; }
+        .day-weekend { background: var(--blank-weekend-bg) !important; color: #b91c1c !important; }
+        .cell-clickable-shift { font-weight: 900; font-size: 8pt; transition: background 0.1s; position: relative; cursor: pointer; }
+        .cell-clickable-shift:hover { background: #cbd5e1 !important; color: #000 !important; }
+        .cell-custom-marker::after {
+            content: ''; position: absolute; bottom: 2px; right: 2px;
+            width: 4px; height: 4px; background: #ff0055; border-radius: 50%;
+        }
+        .sh-color-V { background: #ffffff; color: #cbd5e1; }
+        .sh-color-D { background: #e0f2fe; color: #0369a1; }
+        .sh-color-N { background: #f3e8ff; color: #6b21a8; }
+        .sh-color-custom { background: #fef9c3; color: #a16207; }
+        .checklist-ribbon { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 7.5pt; display: flex; gap: 12px; align-items: center; margin-bottom: 4px; flex-wrap: wrap; }
+        .badge { padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 6.5pt; text-transform: uppercase; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+        .executive-analytics-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; flex: 1; margin: 5px 0; overflow: hidden; }
+        .analytics-block-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; background: #f8fafc; }
+        .analytics-block-card h4 { font-size: 8.5pt; text-transform: uppercase; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 4px; }
+        .summary-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 4px; }
+        .summary-badge { background: #fff; border: 1px solid #e2e8f0; padding: 5px; border-radius: 4px; text-align: center; }
+        .summary-badge .val { font-size: 12pt; font-weight: 800; color: var(--ui-accent); }
+        .summary-badge .lbl { font-size: 6pt; text-transform: uppercase; color: #64748b; font-weight: bold; }
+        .popover-context-menu { 
+            position: absolute; display: none; background: #ffffff; border: 1px solid #000000; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 4px; z-index: 2000; padding: 3px; min-width: 170px; 
+        }
+        .popover-context-menu button { 
+            display: block; width: 100%; padding: 5px 8px; border: none; background: transparent; 
+            text-align: left; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: #000;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .popover-context-menu button:last-child { border-bottom: none; }
+        .popover-context-menu button:hover { background: #e0f2fe; color: #0369a1; }
+        .cell-modal-override {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; border: 2px solid #0f172a; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            border-radius: 6px; padding: 15px; z-index: 3000; width: 300px; display: none; flex-direction: column; gap: 8px;
+        }
+        .cell-modal-override h4 { font-size: 0.8rem; text-transform: uppercase; color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 4px; }
+        .modal-overlay-bg { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.6); z-index: 2900; display: none; }
+        .blank-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 2px; }
+        .blank-signatures { display: flex; justify-content: space-between; font-size: 8pt; border-top: 1px solid #000; padding-top: 3px; margin-top: auto; }
+        .footer-stamp-line { display: flex; justify-content: space-between; align-items: center; border-top: 1px dotted #94a3b8; padding-top: 2px; font-size: 6pt; color: #475569; }
+        .print-filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 4px; }
+        .print-filter-grid label { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: #fff; cursor: pointer; }
+        .tech-monitor-widget {
+            position: fixed; bottom: 15px; right: 15px; width: 320px; background: #0c1020;
+            border: 2px solid #00b4d8; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 4000; color: #fff; font-family: monospace; font-size: 0.65rem; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .tech-monitor-header { background: #1a2342; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00b4d8; }
+        .tech-monitor-logs { height: 90px; overflow-y: auto; padding: 6px; background: #050812; color: #39ff14; display: flex; flex-direction: column; gap: 2px; }
+        .social-link-badge { display: inline-block; padding: 2px 5px; background: #242f54; border-radius: 3px; color: #00b4d8; text-decoration: none; margin-right: 2px; font-weight: bold; }
+        .social-link-badge:hover { background: #3a86ff; color: #fff; }
+        .orientation-toggle { display: flex; gap: 4px; align-items: center; }
+        .orientation-toggle button { padding: 4px 8px; font-size: 0.6rem; }
+        .orientation-toggle .active { background: var(--ui-accent) !important; }
+        .checklist-validator { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; padding: 6px 10px; font-size: 0.7rem; margin-top: 4px; }
+        .checklist-validator.error { background: #fee2e2; border-color: #ef4444; }
+        .checklist-validator.success { background: #dcfce7; border-color: #22c55e; }
+        @media print {
+            html, body { width: auto; height: auto; background: #fff !important; overflow: visible !important; }
+            .sidebar, .popover-context-menu, .canvas-toolbar, .cell-modal-override, .modal-overlay-bg, .tech-monitor-widget { display: none !important; }
+            .canvas-area { padding: 0 !important; margin: 0 !important; background: #fff !important; width: auto !important; }
+            .a4-landscape-page, .a4-portrait-page { box-shadow: none !important; margin: 0 !important; border-left: none !important; border-top: none !important; page-break-before: always !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            .a4-landscape-page:first-of-type, .a4-portrait-page:first-of-type { page-break-before: avoid !important; }
+            @page { margin: 0 !important; }
+            .emp-print-row { display: none !important; }
+            .emp-print-row.print-active { display: table-row !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebarNavElement">
+    <h1>NEURAL_ARCHITECT_PREMIUM++ <span>v14.0 Core</span></h1>
+
+    <div class="config-card">
+        <h3>1. Параметры Организации и Даты</h3>
+        <div class="form-group">
+            <label>Название Компании / Холдинга</label>
+            <input type="text" id="glOrgName" value="" oninput="EnterpriseEngine.state.org = this.value; EnterpriseEngine.renderSystemGrid();">
+        </div>
+        <div class="row-grid-2">
+            <div class="form-group">
+                <label>Расчетный Месяц</label>
+                <select id="glMonthValue" onchange="EnterpriseEngine.actions.changeCalendarPeriod()">
+                    <option value="0">Январь</option><option value="1">Февраль</option><option value="2">Март</option>
+                    <option value="3">Апрель</option><option value="4">Май</option><option value="5">Июнь</option>
+                    <option value="6">Июль</option><option value="7">Август</option><option value="8">Сентябрь</option>
+                    <option value="9">Октябрь</option><option value="10">Ноябрь</option><option value="11">Декабрь</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Календарный Год</label>
+                <input type="number" id="glYearValue" value="2026" oninput="EnterpriseEngine.actions.changeCalendarPeriod()">
+            </div>
+        </div>
+    </div>
+
+    <div class="config-card" style="border-color: #f59e0b; background: #2a1f0a;">
+        <h3>📄 ОРИЕНТАЦИЯ ЛИСТА ПЕЧАТИ</h3>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-secondary" id="btnOrientationLandscape" onclick="EnterpriseEngine.actions.setOrientation('landscape')" style="flex:1;">🌐 Горизонтальная (A4 Landscape)</button>
+            <button class="btn btn-secondary" id="btnOrientationPortrait" onclick="EnterpriseEngine.actions.setOrientation('portrait')" style="flex:1;">📄 Вертикальная (A4 Portrait)</button>
+        </div>
+        <p id="orientationStatusText" style="font-size: 0.6rem; color: #fbbf24; margin-top: 4px; text-align: center;">Текущая: Горизонтальная (297×210мм)</p>
+    </div>
+
+    <div class="config-card" style="border-color: #3a86ff; background: #0e1e38;">
+        <h3>🤖 ИНТЕГРАЦИЯ И СВЯЗЬ С ТЕЛЕГРАМ-БОТОМ</h3>
+        <div class="form-group">
+            <label>Токен Телеграм Бота (API Token)</label>
+            <input type="password" id="tgBotToken" value="718293012:AAH_FakeTokenExampleString" placeholder="718293012:AAH...">
+        </div>
+        <div class="form-group">
+            <label>ID Группы / Чат Каналы отправки (Chat ID)</label>
+            <input type="text" id="tgChatId" value="-100123456789" placeholder="-100...">
+        </div>
+        <button class="btn btn-accent" style="background: #3a86ff; margin-top: 4px;" onclick="EnterpriseEngine.actions.sendScheduleToTelegram()">⚡ Отправить Свод ФОТ в Телеграм Группу</button>
+    </div>
+
+    <div class="config-card" style="border-color: #10b981; background: #0f2d24;">
+        <h3>🖨️ Управление Слоями и Графами Печати</h3>
+        <p style="font-size: 0.6rem; color: #a7f3d0; margin-bottom: 2px;">Отметьте графы, которые должны быть выведены на лист:</p>
+        <div class="print-filter-grid">
+            <label><input type="checkbox" id="chkShowTotalCol" checked onchange="EnterpriseEngine.actions.togglePrintColumns()"> Графа "План"</label>
+            <label><input type="checkbox" id="chkShowNightCol" checked onchange="EnterpriseEngine.actions.togglePrintColumns()"> Графа "Ночные"</label>
+            <label><input type="checkbox" id="chkShowFotCol" checked onchange="EnterpriseEngine.actions.togglePrintColumns()"> Графа "ФОТ"</label>
+            <label><input type="checkbox" id="chkPrintAllStaff" checked onchange="EnterpriseEngine.actions.toggleAllStaffPrintScope()"> <b>Выбрать Всех</b></label>
+        </div>
+        <p style="font-size: 0.6rem; color: #a7f3d0; margin-top: 4px; margin-bottom: 2px;">Персональный выбор сотрудников для вывода на печать:</p>
+        <div class="bulk-employee-selector" id="printStaffSelectorContainer" style="max-height: 100px; background: #071e18; border-color: #10b98144;"></div>
+    </div>
+
+    <div class="config-card" style="border-color: #00b4d8; background: #13223f;">
+        <h3>⚙️ ВРЕМЯ БАЗОВЫХ СМЕН (РЕГИСТРЫ ЧАСОВ)</h3>
+        <div id="shiftsTimeEditorBox" style="display: flex; flex-direction: column; gap: 5px;"></div>
+    </div>
+
+    <div class="config-card">
+        <h3>2. Справочник Должностей (CRUD)</h3>
+        <div id="crudPositionsBox" style="display: flex; flex-direction: column; gap: 4px; max-height: 110px; overflow-y: auto;"></div>
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.addNewPosition()">➕ Создать Должность</button>
+    </div>
+
+    <div class="config-card">
+        <h3>3. Производственные Цеха / Точки (CRUD)</h3>
+        <div id="crudDepartmentsBox" style="display: flex; flex-direction: column; gap: 4px; max-height: 130px; overflow-y: auto;"></div>
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.addNewDepartment()">➕ Создать Новый Цех</button>
+    </div>
+
+    <div class="config-card" style="border-color: #ff007f; background: #1e112a;">
+        <h3>4. Расширенный Конструктор Циклов</h3>
+        <div id="crudPatternsBox" style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px;"></div>
+        <button class="btn btn-accent" style="background: #ff007f;" onclick="EnterpriseEngine.actions.addNewCustomPattern()">➕ Добавить Новый Паттерн</button>
+        
+        <div style="border-top: 1px dashed #ff007f77; margin-top: 4px; padding-top: 4px;">
+            <label style="font-size: 0.62rem; font-weight: 700; color: #ffb3d9; text-transform: uppercase;">Применить цикл к выбранным:</label>
+            <div class="bulk-employee-selector" id="bulkEmployeeCheckboxContainer"></div>
+            
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 4px; margin-top: 5px;">
+                <select id="bulkPatternSelectElement" style="font-size:0.7rem;"></select>
+                <input type="number" id="bulkTargetStartDay" value="1" min="1" max="31" placeholder="С числа">
+            </div>
+            <button class="btn btn-success" style="background:#ff007f; margin-top: 4px;" onclick="EnterpriseEngine.actions.executeBulkPatternDeployment()">⚡ Проставить Шаблон до Конца Месяца</button>
+        </div>
+    </div>
+
+    <div class="config-card">
+        <h3>5. Управление Персоналом (30+ Человек)</h3>
+        <div id="crudEmployeesBox" style="display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto;"></div>
+        <button class="btn btn-success" onclick="EnterpriseEngine.actions.addNewEmployee()">➕ Нанять Сотрудника</button>
+    </div>
+
+    <div class="config-card" style="border-color: #f59e0b; background: #2a1f0a;">
+        <h3>✅ ВАЛИДАЦИЯ ЧЕКЛИСТА (ХАССП/ТК РФ)</h3>
+        <div id="checklistValidatorContainer" class="checklist-validator">
+            Загрузка проверок...
+        </div>
+        <button class="btn btn-secondary" onclick="EnterpriseEngine.actions.runChecklistValidation()" style="margin-top:4px;">🔄 Перезапустить Проверку</button>
+    </div>
+
+    <button class="btn btn-accent" style="background: #3a86ff; padding: 10px; font-size: 0.75rem; margin-top: auto;" onclick="window.print()">🖨️ ПАКЕТНАЯ ПЕЧАТЬ СТРАНИЦ А4</button>
+</div>
+
+<div class="canvas-area" id="canvasViewportArea">
+    <div class="canvas-toolbar">
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.toggleSidebarPanel()">👁️ Скрыть / Показать Сайдбар</button>
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.zoomCanvas(0.1)">🔍+ Увеличить</button>
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.zoomCanvas(-0.1)">🔍- Уменьшить</button>
+        <button class="btn btn-secondary btn-small" onclick="EnterpriseEngine.actions.resetZoom()">🔄 Сброс Масштаба</button>
+    </div>
+    <div id="cascadeA4PagesContainer" style="width: 100%; display: flex; flex-direction: column; gap: 20px; align-items: center; transform-origin: top center;"></div>
+</div>
+
+<div class="popover-context-menu" id="gridShiftCellPopover"></div>
+<div class="modal-overlay-bg" id="modalOverlayMask"></div>
+<div class="cell-modal-override" id="cellCustomTimeOverrideModal">
+    <h4>Точные Часы Смены</h4>
+    <p id="modalInfoLabel" style="font-size:0.7rem; color:#4a5568; font-weight:bold;"></p>
+    <div class="row-grid-2">
+        <div class="form-group">
+            <label style="color:#000;">Начало</label>
+            <input type="text" id="mdInStart" value="08:00" style="color:#000; background:#f1f5f9; border-color:#cbd5e1;">
+        </div>
+        <div class="form-group">
+            <label style="color:#000;">Окончание</label>
+            <input type="text" id="mdInEnd" value="20:00" style="color:#000; background:#f1f5f9; border-color:#cbd5e1;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label style="color:#000;">Обед/Перерыв (ч)</label>
+        <input type="number" id="mdInBreak" step="0.5" value="1" style="color:#000; background:#f1f5f9; border-color:#cbd5e1;">
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+        <button class="btn btn-danger" style="font-size:0.65rem;" onclick="EnterpriseEngine.actions.closeOverrideModal()">Отмена</button>
+        <button class="btn btn-success" style="font-size:0.65rem;" onclick="EnterpriseEngine.actions.saveOverrideModalData()">Сохранить</button>
+    </div>
+</div>
+
+<div class="tech-monitor-widget" id="techMonitorBlock">
+    <div class="tech-monitor-header">
+        <span>🤖 INDUSTRIAL CORE SECURITY</span>
+        <button style="background:none; border:none; color:#ff007f; cursor:pointer; font-weight:bold;" onclick="document.getElementById('techMonitorBlock').style.display='none'">×</button>
+    </div>
+    <div style="padding: 5px; background: #111625; border-bottom: 1px solid #1c2541;">
+        <a class="social-link-badge" target="_blank" href="https://t.me/asv_prod">TG: @asv_prod</a>
+        <a class="social-link-badge" target="_blank" href="https://vk.com/smolyaninovchef">VK</a>
+        <a class="social-link-badge" target="_blank" href="https://dzen.ru/asv_prod">Дзен</a>
+        <a class="social-link-badge" target="_blank" href="https://github.com/smol0901-jpg">GitHub</a>
+    </div>
+    <div class="tech-monitor-logs" id="sysLoggerBox">
+        <div>[SYSTEM] Инициализация ядра NEURAL_ARCHITECT_PREMIUM++... Успешно.</div>
+    </div>
+</div>
+
+<script>
+    const EnterpriseEngine = {
+        state: {
+            org: "ГК 'ПРОД-МАСТЕР' / Сеть Ресторанов и Производства",
+            month: 5,
+            year: 2026,
+            orientation: 'landscape',
+            zoomLevel: 1,
+            runtime: { collapsed: false, targetCell: null },
+            printLayers: {
+                showTotal: true,
+                showNight: true,
+                showFot: true,
+                allowedEmployees: {}
+            },
+            positions: [
+                { id: "p_1", name: "Шеф-Повар / Бригадир" },
+                { id: "p_2", name: "Старший Технолог цеха" },
+                { id: "p_3", name: "Повар-обвальщик мяса" },
+                { id: "p_4", name: "Оператор фасовки холдинга" },
+                { id: "p_5", name: "Мойщик производственной тары" },
+                { id: "p_6", name: "Кладовщик склада сырья" }
+            ],
+            departments: [
+                { id: "d_1", name: "Разделочно-Мясной Департамент", minStaff: 2, maxStaff: 6, maxHours: 165 },
+                { id: "d_2", name: "Горячий Кулинарный Цех", minStaff: 1, maxStaff: 5, maxHours: 174 },
+                { id: "d_3", name: "Цех Холодных Закусок", minStaff: 1, maxStaff: 4, maxHours: 160 }
+            ],
+            patterns: [
+                { id: "pt_1", name: "График 2/2 (Дневные)", sequence: ["Д", "Д", "В", "В"] },
+                { id: "pt_2", name: "График Пятидневка 5/2", sequence: ["Д", "Д", "Д", "Д", "Д", "В", "В"] },
+                { id: "pt_3", name: "Сменный День/Ночь/48", sequence: ["Д", "Н", "В", "В"] }
+            ],
+            shifts: {
+                'Д': { name: 'Дневная', start: '08:00', end: '20:00', break: 1, color: 'sh-color-D' },
+                'Н': { name: 'Ночная', start: '20:00', end: '08:00', break: 1, color: 'sh-color-N' },
+                'В': { name: 'Выходной', start: '00:00', end: '00:00', break: 0, color: 'sh-color-V' }
+            },
+            employees: [
+                { id: 1, name: "Казаков Д.А.", departmentId: "d_1", positionId: "p_3", rate: 420, schedule: {1:{code:'Д'},2:{code:'Д'},5:{code:'Н'},6:{code:'Н'}} },
+                { id: 2, name: "Менделеев В.С.", departmentId: "d_1", positionId: "p_2", rate: 500, schedule: {1:{code:'Н'},2:{code:'В'},3:{code:'Д'},4:{code:'Д'}} },
+                { id: 3, name: "Королева Е.Н.", departmentId: "d_2", positionId: "p_1", rate: 550, schedule: {1:{code:'Д'},2:{code:'Д'},3:{code:'Д'},4:{code:'Д'},5:{code:'Д'}} },
+                { id: 4, name: "Анисимова О.В.", departmentId: "d_2", positionId: "p_4", rate: 350, schedule: {1:{code:'В'},2:{code:'В'},3:{code:'Н'},4:{code:'В'}} },
+                { id: 5, name: "Петров С.И.", departmentId: "d_3", positionId: "p_5", rate: 380, schedule: {1:{code:'Д'},2:{code:'Д'},3:{code:'Д'},4:{code:'В'},5:{code:'В'}} },
+                { id: 6, name: "Сидорова А.К.", departmentId: "d_1", positionId: "p_6", rate: 360, schedule: {1:{code:'В'},2:{code:'Д'},3:{code:'Д'},4:{code:'Д'},5:{code:'В'}} }
+            ]
+        },
+
+        init: function() {
+            document.getElementById('glOrgName').value = this.state.org;
+            document.getElementById('glMonthValue').value = this.state.month;
+            document.getElementById('glYearValue').value = this.state.year;
+
+            this.state.employees.forEach(e => {
+                this.state.printLayers.allowedEmployees[e.id] = true;
+            });
+
+            this.setOrientation('landscape');
+            this.refreshSidebarControls();
+            this.log("[SYSTEM] Монолитное SPA успешно развернуто. Объем таблиц оптимизирован.");
+
+            document.body.addEventListener('click', () => {
+                document.getElementById('gridShiftCellPopover').style.display = 'none';
+            });
+
+            this.runChecklistValidation();
+        },
+
+        log: function(msg) {
+            const box = document.getElementById('sysLoggerBox');
+            if (box) {
+                let d = new Date();
+                box.innerHTML += `<div>[${d.toLocaleTimeString()}] ${msg}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }
+        },
+
+        refreshSidebarControls: function() {
+            this.ui.renderShiftsTimeEditor();
+            this.ui.renderPositionsCRUD();
+            this.ui.renderDepartmentsCRUD();
+            this.ui.renderPatternsCRUD();
+            this.ui.renderEmployeesCRUD();
+            this.ui.renderPrintSelectorPanel();
+            this.renderSystemGrid();
+            this.runChecklistValidation();
+        },
+
+        calculateHoursEngine: function(startStr, endStr, breakHours) {
+            if (!startStr || !endStr || (startStr === '00:00' && endStr === '00:00')) return { total: 0, night: 0 };
+            let [sH, sM] = startStr.split(':').map(Number);
+            let [eH, eM] = endStr.split(':').map(Number);
+            let brk = parseFloat(breakHours) || 0;
+
+            let startDec = sH + sM / 60;
+            let endDec = eH + eM / 60;
+            if (endDec <= startDec) endDec += 24;
+
+            let netDuration = (endDec - startDec) - brk;
+            let nightHours = 0;
+            for (let t = startDec; t < endDec; t += 0.5) {
+                let hour = t % 24;
+                if (hour >= 22 || hour < 6) nightHours += 0.5;
+            }
+            if (nightHours > 0 && startDec >= 20) nightHours = Math.max(0, nightHours - brk);
+            return { total: Math.max(0, netDuration), night: Math.max(0, nightHours) };
+        },
+
+        setOrientation: function(orientation) {
+            this.state.orientation = orientation;
+            const btnL = document.getElementById('btnOrientationLandscape');
+            const btnP = document.getElementById('btnOrientationPortrait');
+            const statusText = document.getElementById('orientationStatusText');
+
+            btnL.classList.remove('active');
+            btnP.classList.remove('active');
+
+            if (orientation === 'landscape') {
+                btnL.classList.add('active');
+                btnL.style.background = 'var(--ui-accent)';
+                btnP.style.background = '';
+                statusText.innerText = 'Текущая: Горизонтальная (297×210мм)';
+            } else {
+                btnP.classList.add('active');
+                btnP.style.background = 'var(--ui-accent)';
+                btnL.style.background = '';
+                statusText.innerText = 'Текущая: Вертикальная (210×297мм)';
+            }
+
+            this.log(`[ORIENTATION] Переключено на: ${orientation === 'landscape' ? 'Горизонтальная' : 'Вертикальная'}`);
+            this.renderSystemGrid();
+        },
+
+        zoomCanvas: function(delta) {
+            this.state.zoomLevel = Math.max(0.4, Math.min(1.5, this.state.zoomLevel + delta));
+            document.getElementById('cascadeA4PagesContainer').style.transform = `scale(${this.state.zoomLevel})`;
+            this.log(`[ZOOM] Масштаб: ${Math.round(this.state.zoomLevel * 100)}%`);
+        },
+
+        resetZoom: function() {
+            this.state.zoomLevel = 1;
+            document.getElementById('cascadeA4PagesContainer').style.transform = `scale(1)`;
+            this.log('[ZOOM] Сброс масштаба до 100%');
+        },
+
+        getPageSizeConfig: function() {
+            if (this.state.orientation === 'landscape') {
+                return { width: '297mm', height: '210mm', pageClass: 'a4-landscape-page' };
+            } else {
+                return { width: '210mm', height: '297mm', pageClass: 'a4-portrait-page' };
+            }
+        },
+
+        getDaysInMonth: function() {
+            return new Date(this.state.year, this.state.month + 1, 0).getDate();
+        },
+
+        getWeekdayName: function(day) {
+            const weekdays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+            return weekdays[new Date(this.state.year, this.state.month, day).getDay()];
+        },
+
+        isWeekend: function(day) {
+            const wd = new Date(this.state.year, this.state.month, day).getDay();
+            return wd === 0 || wd === 6;
+        },
+
+        getMonthName: function() {
+            const months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+            return months[this.state.month];
+        },
+
+        renderSystemGrid: function() {
+            const container = document.getElementById('cascadeA4PagesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const daysInMonth = this.getDaysInMonth();
+            const pageSize = this.getPageSizeConfig();
+            const monthName = this.getMonthName();
+
+            let extraClasses = "";
+            if (!this.state.printLayers.showTotal) extraClasses += " hide-col-total";
+            if (!this.state.printLayers.showNight) extraClasses += " hide-col-night";
+            if (!this.state.printLayers.showFot) extraClasses += " hide-col-fot";
+
+            let statsMatrix = {
+                grandTotalFot: 0, grandTotalHours: 0, grandTotalNight: 0,
+                deptHours: {}, deptFot: {}, deptHeadcount: {}, dailyDensity: {}
+            };
+            for (let d = 1; d <= daysInMonth; d++) statsMatrix.dailyDensity[d] = 0;
+
+            this.state.departments.forEach((dept) => {
+                statsMatrix.deptHours[dept.id] = 0;
+                statsMatrix.deptFot[dept.id] = 0;
+
+                let deptStaff = this.state.employees.filter(e => e.departmentId === dept.id);
+                statsMatrix.deptHeadcount[dept.id] = deptStaff.length;
+
+                let overtimesRegistered = 0;
+                let dailyOutputs = {};
+                for (let d = 1; d <= daysInMonth; d++) dailyOutputs[d] = 0;
+
+                deptStaff.forEach(emp => {
+                    let totalMonthHours = 0;
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        let cell = emp.schedule[d] || { code: 'В' };
+                        let h = 0;
+                        if (cell.isCustom) {
+                            h = this.calculateHoursEngine(cell.start, cell.end, cell.break).total;
+                        } else {
+                            let tmpl = this.state.shifts[cell.code] || { start: '00:00', end: '00:00', break: 0 };
+                            h = this.calculateHoursEngine(tmpl.start, tmpl.end, tmpl.break).total;
+                        }
+                        totalMonthHours += h;
+                        if (h > 0) dailyOutputs[d]++;
+                    }
+                    if (totalMonthHours > dept.maxHours) overtimesRegistered++;
+                });
+
+                let flagUnderstaffed = false;
+                let flagOvercrowded = false;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let c = dailyOutputs[d];
+                    if (c < dept.minStaff && deptStaff.length > 0) flagUnderstaffed = true;
+                    if (c > dept.maxStaff) flagOvercrowded = true;
+                    statsMatrix.dailyDensity[d] += c;
+                }
+
+                let pageNode = document.createElement('div');
+                pageNode.className = `${pageSize.pageClass}`;
+                if (this.state.orientation === 'portrait') pageNode.classList.add('portrait-mode');
+
+                let htmlContent = `
+                    <div class="blank-header">
+                        <div><strong>NEURAL_ARCHITECT_PREMIUM++</strong><br><span style="font-size:5.5pt; color:#4a5569; font-weight:bold;">Industrial Quality Control Core v14.0</span></div>
+                        <div style="text-align:right; font-size:6.5pt; font-weight:bold;">УТВЕРЖДАЮ: Директор холдинга ___________________</div>
+                    </div>
+
+                    <div style="text-align:center; margin:1px 0;">
+                        <h2 style="font-size:10pt; font-weight:900; letter-spacing:-0.3px;">ГРАФИК ВЫХОДА НА СМЕНЫ И УЧЕТА РАБОЧЕГО ВРЕМЕНИ</h2>
+                        <p style="font-size:7pt; color:#4a5569;">Подразделение/Локация: <b style="color:#000;">${dept.name.toUpperCase()}</b> | Сводный месяц: ${monthName} ${this.state.year} г.</p>
+                    </div>
+
+                    <div class="checklist-ribbon">
+                        <strong>Валидация ХАССП/ТК РФ:</strong>
+                        <span>Плотность смены (Мин ${dept.minStaff} / Макс ${dept.maxStaff} чел): ${flagUnderstaffed ? '<b class="badge badge-danger">⚠️ Недокомплект</b>' : (flagOvercrowded ? '<b class="badge badge-warning">⚠️ Превышение лимита</b>' : '<b class="badge badge-success">✓ Норма присутствия</b>')}</span>
+                        <span>Порог выработки (${dept.maxHours} ч): ${overtimesRegistered > 0 ? '<b class="badge badge-danger">⚠️ Фиксация переработок</b>' : '<b class="badge badge-success">✓ Переработки отсутствуют</b>'}</span>
+                    </div>
+
+                    <div style="width:100%; flex:1; overflow:hidden;">
+                        <table class="schedule-table ${extraClasses}">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="col-idx">№</th>
+                                    <th rowspan="2" class="col-emp">ФИО Сотрудника</th>
+                                    <th rowspan="2" class="col-pos">Должность</th>`;
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let wdClass = this.isWeekend(d) ? 'day-weekend' : '';
+                    htmlContent += `<th class="col-day ${wdClass}">${d}</th>`;
+                }
+                htmlContent += `<th rowspan="2" class="col-total">План</th><th rowspan="2" class="col-night">Ноч.</th><th rowspan="2" class="col-fot">ФОТ</th></tr><tr>`;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let wdClass = this.isWeekend(d) ? 'day-weekend' : '';
+                    htmlContent += `<th style="font-size:5.5pt;" class="${wdClass}">${this.getWeekdayName(d)}</th>`;
+                }
+                htmlContent += `</tr></thead><tbody>`;
+
+                let runningHrs = 0, runningNgt = 0, runningFot = 0;
+                let activePrintedIndex = 1;
+
+                if (deptStaff.length === 0) {
+                    htmlContent += `<tr><td colspan="${daysInMonth+6}" style="color:#718096; font-style:italic; padding:15px 0;">Штатные единицы не назначены. Привяжите сотрудников к данному цеху в сайдбаре.</td></tr>`;
+                } else {
+                    deptStaff.forEach((emp) => {
+                        let eHrs = 0, eNgt = 0;
+                        let specName = this.state.positions.find(p => p.id === emp.positionId)?.name || "Сотрудник";
+
+                        let isEmployeeAllowedToPrint = this.state.printLayers.allowedEmployees[emp.id] !== false;
+                        let rowPrintClass = isEmployeeAllowedToPrint ? "emp-print-row print-active" : "emp-print-row";
+
+                        let nameStyle = "font-size: 7.5pt; font-weight:bold; word-wrap:break-word; word-break:break-all;";
+                        let posStyle = "font-size: 6.5pt; word-wrap:break-word; word-break:break-all;";
+
+                        let row = `<td>${isEmployeeAllowedToPrint ? activePrintedIndex++ : '-'}</td>
+                                   <td class="col-emp" style="${nameStyle}">${emp.name}</td>
+                                   <td class="col-pos" style="${posStyle}">${specName}</td>`;
+
+                        for (let d = 1; d <= daysInMonth; d++) {
+                            let cell = emp.schedule[d] || { code: 'В' };
+                            let code = cell.code;
+                            let classes = 'cell-clickable-shift';
+                            let title = "";
+
+                            if (cell.isCustom) {
+                                classes += ' cell-custom-marker sh-color-custom';
+                                code = "★";
+                                let metrics = this.calculateHoursEngine(cell.start, cell.end, cell.break);
+                                eHrs += metrics.total; eNgt += metrics.night;
+                                title = `Индивидуально: ${cell.start}-${cell.end}, Обед: ${cell.break}ч. Итого: ${metrics.total}ч`;
+                            } else {
+                                let t = this.state.shifts[cell.code] || { color: 'sh-color-V', start: '00:00', end: '00:00', break: 0 };
+                                classes += ` ${t.color}`;
+                                let metrics = this.calculateHoursEngine(t.start, t.end, t.break);
+                                eHrs += metrics.total; eNgt += metrics.night;
+                                title = `${t.name}: ${t.start}-${t.end}, Обед: ${t.break}ч`;
+                            }
+
+                            let wdClass = this.isWeekend(d) ? 'day-weekend' : '';
+                            row += `<td class="${classes} ${wdClass}" data-empid="${emp.id}" data-day="${d}" title="${title}">${code}</td>`;
+                        }
+
+                        let computedFot = Math.round((eHrs * emp.rate) + (eNgt * emp.rate * 0.20));
+
+                        if (isEmployeeAllowedToPrint) {
+                            runningHrs += eHrs; runningNgt += eNgt; runningFot += computedFot;
+                        }
+
+                        row += `<td class="col-total ${eHrs > dept.maxHours ? 'day-weekend' : ''}">${eHrs}ч</td><td class="col-night">${eNgt}ч</td><td class="col-fot" style="font-weight:bold;">${computedFot}₽</td>`;
+                        htmlContent += `<tr class="${rowPrintClass}">${row}</tr>`;
+                    });
+                }
+
+                statsMatrix.grandTotalHours += runningHrs;
+                statsMatrix.grandTotalNight += runningNgt;
+                statsMatrix.grandTotalFot += runningFot;
+                statsMatrix.deptHours[dept.id] = runningHrs;
+                statsMatrix.deptFot[dept.id] = runningFot;
+
+                htmlContent += `<tr style="background:#e2e8f0; font-weight:bold;"><td colspan="3">ИТОГО ПО ЦЕХУ:</td>`;
+                for (let d = 1; d <= daysInMonth; d++) htmlContent += '<td></td>';
+                htmlContent += `<td class="col-total">${runningHrs}ч</td><td class="col-night">${runningNgt}ч</td><td class="col-fot">${runningFot}₽</td></tr>`;
+
+                htmlContent += `<tr style="background:#f8fafc; color:#4a5569;"><td colspan="3">Плотность присутствия (чел):</td>`;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let count = dailyOutputs[d];
+                    let style = (count < dept.minStaff && deptStaff.length > 0) || (count > dept.maxStaff) ? 'style="background:#fee2e2; color:#b91c1c; font-weight:bold;"' : '';
+                    htmlContent += `<td ${style}>${count}</td>`;
+                }
+                htmlContent += `<td colspan="3" class="col-total-placeholder" style="font-size:5.5pt; font-weight:bold; background:#e2e8f0; text-align:center;">СВОД</td></tr></tbody></table></div>`;
+
+                htmlContent += `
+                    <div class="blank-signatures">
+                        <div>Руководитель подразделения: ___________________________</div>
+                        <div>Отдел Кадров / Аудитор: ___________________________</div>
+                    </div>
+                    <div class="footer-stamp-line">
+                        <div>Разработка: <b>TG: @asv_prod | VK: smolyaninovchef | Dzen: asv_prod | GitHub: smol0901-jpg</b></div>
+                        <div>Платформа: <b>NEURAL_ARCHITECT_PREMIUM++ Build v14.0</b></div>
+                        <div>Сгенерировано: ${new Date().toLocaleDateString('ru-RU')} в ${new Date().toLocaleTimeString('ru-RU')}</div>
+                    </div>
+                `;
+
+                pageNode.innerHTML = htmlContent;
+                container.appendChild(pageNode);
+            });
+
+            this.renderExecutiveAnalyticsDashboard(container, daysInMonth, this.getMonthName(), statsMatrix);
+            this.ui.bindGridCellsToContextPopover();
+            this.runChecklistValidation();
+        },
+
+        renderExecutiveAnalyticsDashboard: function(container, daysInMonth, monthName, data) {
+            let page = document.createElement('div');
+            const pageSize = this.getPageSizeConfig();
+            page.className = `${pageSize.pageClass} analytics-page`;
+
+            let pointsString = "";
+            let maxOutput = Math.max(...Object.values(data.dailyDensity), 2);
+            for (let d = 1; d <= daysInMonth; d++) {
+                let x = 40 + ((d - 1) * (500 / (daysInMonth - 1)));
+                let y = 140 - (data.dailyDensity[d] * (100 / maxOutput));
+                pointsString += `${x},${y} `;
+            }
+
+            let sumFot = Object.values(data.deptFot).reduce((a,b)=>a+b, 0) || 1;
+            let offsetAngle = 0;
+            let donutSectorsHtml = "";
+            let colorPalette = ["#3a86ff", "#0096c7", "#ff007f", "#ffaa00", "#7209b7"];
+
+            this.state.departments.forEach((dept, i) => {
+                let currentDeptFot = data.deptFot[dept.id] || 0;
+                let share = (currentDeptFot / sumFot);
+                let dashArray = `${share * 251.2} 251.2`;
+                let dashOffset = `-${offsetAngle * 251.2}`;
+                offsetAngle += share;
+
+                donutSectorsHtml += `<circle cx="50" cy="50" r="40" fill="transparent" stroke="${colorPalette[i % colorPalette.length]}" stroke-width="12" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" transform="rotate(-90 50 50)"></circle>`;
+            });
+
+            page.innerHTML = `
+                <div class="blank-header" style="border-color: #10b981;">
+                    <div><strong>NEURAL_ARCHITECT_PREMIUM++ ANALYTICS</strong><br><span style="font-size:5.5pt; color:#10b981; font-weight:bold;">Executive Board Analytical Brief</span></div>
+                    <div style="text-align:right; font-size:6.5pt; color:#718096; font-weight:bold;">СТРОГО КОНФИДЕНЦИАЛЬНО / АУДИТ ФОТ</div>
+                </div>
+
+                <div style="text-align:center; margin:3px 0;">
+                    <h2 style="font-size:10pt; font-weight:900; color:#0f172a;">СВОДНЫЙ АНАЛИТИЧЕСКИЙ ОТЧЕТ И СТРУКТУРА ЗАТРАТ</h2>
+                    <p style="font-size:7.5pt; color:#4a5569;">Глобальный анализ утилизации ресурсов холдинга за период: <b style="color:#000;">${monthName.toUpperCase()} ${this.state.year} г.</b></p>
+                </div>
+
+                <div class="summary-strip">
+                    <div class="summary-badge"><div class="val">${data.grandTotalFot.toLocaleString()} ₽</div><div class="lbl">Глобальный ФОТ фабрики</div></div>
+                    <div class="summary-badge"><div class="val">${data.grandTotalHours} ч</div><div class="lbl">Суммарные человеко-часы</div></div>
+                    <div class="summary-badge"><div class="val">${data.grandTotalNight} ч</div><div class="lbl">Ночная нагрузка (ТК РФ)</div></div>
+                    <div class="summary-badge"><div class="val">${this.state.employees.filter(e => this.state.printLayers.allowedEmployees[e.id] !== false).length} чел.</div><div class="lbl">Активный штат на листах</div></div>
+                </div>
+
+                <div class="executive-analytics-grid">
+                    <div class="analytics-block-card">
+                        <h4>1. Суточный график плотности персонала холдинга (выходов рабочих в день)</h4>
+                        <div style="position:relative; flex:1; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:5px;">
+                            <svg viewBox="0 0 560 160" style="width:100%; height:100%;">
+                                <line x1="40" y1="20" x2="40" y2="140" stroke="#94a3b8" stroke-width="1.2"></line>
+                                <line x1="40" y1="140" x2="550" y2="140" stroke="#94a3b8" stroke-width="1.2"></line>
+                                <text x="12" y="24" fill="#64748b" font-size="7" font-weight="bold">Пик (${maxOutput} чел)</text>
+
+                                ${Object.keys(data.dailyDensity).map((d) => {
+                                    let x = 40 + ((d - 1) * (500 / (daysInMonth - 1)));
+                                    return `<line x1="${x}" y1="140" x2="${x}" y2="143" stroke="#475569"></line>
+                                            <text x="${x-3}" y="151" fill="#475569" font-size="6">${d}</text>`;
+                                }).join('')}
+
+                                <polygon points="40,140 ${pointsString} 540,140" fill="url(#blueGradId)" opacity="0.15"></polygon>
+                                <polyline points="${pointsString}" fill="none" stroke="#3a86ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+
+                                <defs>
+                                    <linearGradient id="blueGradId" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#3a86ff"></stop>
+                                        <stop offset="100%" stop-color="#fff" stop-opacity="0"></stop>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="analytics-block-card">
+                        <h4>2. Долевое финансовое распределение бюджетов по цехам</h4>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:15px; flex:1;">
+                            <svg viewBox="0 0 100 100" style="width:85px; height:85px;">
+                                ${donutSectorsHtml}
+                                <circle cx="50" cy="50" r="28" fill="#f8fafc"></circle>
+                                <text x="50" y="53" text-anchor="middle" font-size="7" font-weight="900" fill="#1e293b">БЮДЖЕТ</text>
+                            </svg>
+                            <div style="display:flex; flex-direction:column; gap:4px; flex:1; font-size:7pt;">
+                                ${this.state.departments.map((d, idx) => {
+                                    let f = data.deptFot[d.id] || 0;
+                                    let h = data.deptHours[d.id] || 0;
+                                    let sharePct = sumFot > 0 ? Math.round((f/sumFot)*100) : 0;
+                                    return `<div style="display:flex; flex-direction:column; border-left:3.5px solid ${colorPalette[idx%colorPalette.length]}; padding-left:5px;">
+                                                <span style="font-weight:bold; color:#0f172a; line-height:8pt;">${d.name}</span>
+                                                <span style="color:#4a5569; font-size:6.5pt;">${f.toLocaleString()} ₽ (${sharePct}%) | Выработка: ${h}ч</span>
+                                            </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blank-signatures" style="border-color:#10b981;">
+                    <div>Главный финансовый директор: ___________________________</div>
+                    <div>Инженер-автор: <b>TG: @asv_prod (smol0901-jpg)</b></div>
+                </div>
+            `;
+            container.appendChild(page);
+        },
+
+        runChecklistValidation: function() {
+            const container = document.getElementById('checklistValidatorContainer');
+            if (!container) return;
+
+            let issues = [];
+            let warnings = [];
+            let successes = [];
+
+            const daysInMonth = this.getDaysInMonth();
+
+            this.state.departments.forEach(dept => {
+                let deptStaff = this.state.employees.filter(e => e.departmentId === dept.id);
+                if (deptStaff.length === 0) {
+                    warnings.push(`⚠️ Цех "${dept.name}" не имеет сотрудников`);
+                }
+
+                let overtimesCount = 0;
+                let understaffDays = [];
+                let overcrowdedDays = [];
+
+                deptStaff.forEach(emp => {
+                    let totalHrs = 0;
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        let cell = emp.schedule[d] || { code: 'В' };
+                        let h = 0;
+                        if (cell.isCustom) {
+                            h = this.calculateHoursEngine(cell.start, cell.end, cell.break).total;
+                        } else {
+                            let tmpl = this.state.shifts[cell.code] || { start: '00:00', end: '00:00', break: 0 };
+                            h = this.calculateHoursEngine(tmpl.start, tmpl.end, tmpl.break).total;
+                        }
+                        totalHrs += h;
+                    }
+                    if (totalHrs > dept.maxHours) {
+                        overtimesCount++;
+                        issues.push(`❌ ${emp.name} превысил лимит часов (${totalHrs}/${dept.maxHours}) в цехе "${dept.name}"`);
+                    }
+                });
+
+                let dailyCounts = {};
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let count = 0;
+                    deptStaff.forEach(emp => {
+                        let cell = emp.schedule[d] || { code: 'В' };
+                        if (cell.code !== 'В') count++;
+                    });
+                    dailyCounts[d] = count;
+                    if (count < dept.minStaff && deptStaff.length > 0) understaffDays.push(d);
+                    if (count > dept.maxStaff) overcrowdedDays.push(d);
+                }
+
+                if (understaffDays.length > 0) {
+                    warnings.push(`⚠️ ${dept.name}: Недокомплект в дни: ${understaffDays.join(', ')}`);
+                }
+                if (overcrowdedDays.length > 0) {
+                    warnings.push(`⚠️ ${dept.name}: Превышение лимита в дни: ${overcrowdedDays.join(', ')}`);
+                }
+                if (overtimesCount === 0 && understaffDays.length === 0 && overcrowdedDays.length === 0) {
+                    successes.push(`✅ ${dept.name}: Все нормы соблюдены`);
+                }
+            });
+
+            let unassignedEmps = this.state.employees.filter(e => !e.departmentId);
+            if (unassignedEmps.length > 0) {
+                warnings.push(`⚠️ ${unassignedEmps.length} сотрудник(ов) не привязаны к цеху`);
+            } else {
+                successes.push(`✅ Все сотрудники привязаны к цехам`);
+            }
+
+            let html = '';
+            if (issues.length > 0) {
+                html += `<div style="margin-bottom:4px;"><b>Ошибки:</b><br>${issues.join('<br>')}</div>`;
+            }
+            if (warnings.length > 0) {
+                html += `<div style="margin-bottom:4px;"><b>Предупреждения:</b><br>${warnings.join('<br>')}</div>`;
+            }
+            if (successes.length > 0) {
+                html += `<div>${successes.join('<br>')}</div>`;
+            }
+            if (html === '') html = 'Все проверки пройдены успешно.';
+
+            container.className = `checklist-validator ${issues.length > 0 ? 'error' : (warnings.length > 0 ? '' : 'success')}`;
+            container.innerHTML = html;
+        },
+
+        ui: {
+            renderPrintSelectorPanel: function() {
+                const box = document.getElementById('printStaffSelectorContainer');
+                if(!box) return; box.innerHTML = '';
+
+                EnterpriseEngine.state.employees.forEach(emp => {
+                    let isChecked = EnterpriseEngine.state.printLayers.allowedEmployees[emp.id] !== false;
+                    let lbl = document.createElement('label');
+                    lbl.className = 'bulk-emp-label';
+                    lbl.innerHTML = `<input type="checkbox" data-print-empid="${emp.id}" ${isChecked ? 'checked' : ''} onchange="EnterpriseEngine.actions.toggleStaffPrintRow(${emp.id}, this.checked)">
+                                     <span>${emp.name}</span>`;
+                    box.appendChild(lbl);
+                });
+            },
+
+            renderShiftsTimeEditor: function() {
+                const container = document.getElementById('shiftsTimeEditorBox');
+                if(!container) return; container.innerHTML = '';
+
+                Object.keys(EnterpriseEngine.state.shifts).forEach(key => {
+                    let sh = EnterpriseEngine.state.shifts[key];
+                    let div = document.createElement('div');
+                    div.className = 'crud-row';
+                    div.style.borderLeft = `4px solid var(--ui-accent)`;
+
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:900; color:#fff; font-size:0.75rem;">Код смены: [${key}]</span>
+                            <input type="text" value="${sh.name}" style="width:140px; font-size:0.65rem;" oninput="EnterpriseEngine.state.shifts['${key}'].name=this.value; EnterpriseEngine.renderSystemGrid();">
+                        </div>
+                        <div class="row-grid-3">
+                            <div><label style="font-size:5.5pt; color:var(--ui-text-muted);">НАЧ.</label><input type="text" value="${sh.start}" oninput="EnterpriseEngine.state.shifts['${key}'].start=this.value; EnterpriseEngine.renderSystemGrid();"></div>
+                            <div><label style="font-size:5.5pt; color:var(--ui-text-muted);">КОН.</label><input type="text" value="${sh.end}" oninput="EnterpriseEngine.state.shifts['${key}'].end=this.value; EnterpriseEngine.renderSystemGrid();"></div>
+                            <div><label style="font-size:5.5pt; color:var(--ui-text-muted);">ОБЕД</label><input type="number" step="0.5" value="${sh.break}" oninput="EnterpriseEngine.state.shifts['${key}'].break=parseFloat(this.value)||0; EnterpriseEngine.renderSystemGrid();"></div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            renderPositionsCRUD: function() {
+                const container = document.getElementById('crudPositionsBox');
+                if(!container) return; container.innerHTML = '';
+                EnterpriseEngine.state.positions.forEach((pos, idx) => {
+                    let row = document.createElement('div'); row.className = 'crud-row';
+                    row.innerHTML = `
+                        <div class="crud-header-line">
+                            <input type="text" value="${pos.name}" oninput="EnterpriseEngine.state.positions[${idx}].name=this.value; EnterpriseEngine.renderSystemGrid();">
+                            <button class="btn btn-danger btn-small" onclick="EnterpriseEngine.state.positions.splice(${idx},1); EnterpriseEngine.refreshSidebarControls();">×</button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            },
+
+            renderDepartmentsCRUD: function() {
+                const container = document.getElementById('crudDepartmentsBox');
+                if (!container) return; container.innerHTML = '';
+                EnterpriseEngine.state.departments.forEach((dept, idx) => {
+                    const row = document.createElement('div'); row.className = 'crud-row';
+                    row.innerHTML = `
+                        <div class="crud-header-line">
+                            <input type="text" value="${dept.name}" style="font-weight:bold; color:var(--ui-accent-hover);" oninput="EnterpriseEngine.state.departments[${idx}].name=this.value; EnterpriseEngine.renderSystemGrid();">
+                            <button class="btn btn-danger btn-small" onclick="EnterpriseEngine.state.departments.splice(${idx},1); EnterpriseEngine.refreshSidebarControls();">×</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-size:6.5pt;">
+                            <div>Мин.чел:<input type="number" value="${dept.minStaff}" oninput="EnterpriseEngine.state.departments[${idx}].minStaff=parseInt(this.value)||0; EnterpriseEngine.renderSystemGrid();"></div>
+                            <div>Макс.чел:<input type="number" value="${dept.maxStaff}" oninput="EnterpriseEngine.state.departments[${idx}].maxStaff=parseInt(this.value)||0; EnterpriseEngine.renderSystemGrid();"></div>
+                            <div>Лимит ч:<input type="number" value="${dept.maxHours}" oninput="EnterpriseEngine.state.departments[${idx}].maxHours=parseInt(this.value)||0; EnterpriseEngine.renderSystemGrid();"></div>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            },
+
+            renderPatternsCRUD: function() {
+                const container = document.getElementById('crudPatternsBox');
+                const select = document.getElementById('bulkPatternSelectElement');
+                if(!container || !select) return;
+                container.innerHTML = ''; select.innerHTML = '';
+
+                EnterpriseEngine.state.patterns.forEach((pat, idx) => {
+                    let opt = document.createElement('option'); opt.value = pat.id; opt.innerText = pat.name;
+                    select.appendChild(opt);
+
+                    let item = document.createElement('div'); item.className = 'crud-row';
+                    item.innerHTML = `
+                        <div class="crud-header-line">
+                            <input type="text" value="${pat.name}" style="font-weight:bold; color:#ff007f;" oninput="EnterpriseEngine.state.patterns[${idx}].name=this.value;">
+                            <button class="btn btn-danger btn-small" onclick="EnterpriseEngine.state.patterns.splice(${idx},1); EnterpriseEngine.refreshSidebarControls();">×</button>
+                        </div>
+                        <div style="font-size:6.5pt; color:var(--ui-text-muted);">Последовательность: [${pat.sequence.join(' → ')}]</div>
+                    `;
+                    container.appendChild(item);
+                });
+            },
+
+            renderEmployeesCRUD: function() {
+                const container = document.getElementById('crudEmployeesBox');
+                const bulkZone = document.getElementById('bulkEmployeeCheckboxContainer');
+                if (!container || !bulkZone) return;
+                container.innerHTML = ''; bulkZone.innerHTML = '';
+
+                EnterpriseEngine.state.employees.forEach((emp, idx) => {
+                    let deptOpts = '<option value="">-- В резерве (Без цеха) --</option>';
+                    EnterpriseEngine.state.departments.forEach(d => deptOpts += `<option value="${d.id}" ${d.id === emp.departmentId ? 'selected' : ''}>${d.name}</option>`);
+
+                    let posOpts = '<option value="">-- Без должности --</option>';
+                    EnterpriseEngine.state.positions.forEach(p => posOpts += `<option value="${p.id}" ${p.id === emp.positionId ? 'selected' : ''}>${p.name}</option>`);
+
+                    const card = document.createElement('div'); card.className = 'crud-row';
+                    card.innerHTML = `
+                        <div class="crud-header-line">
+                            <input type="text" value="${emp.name}" style="font-weight:bold;" oninput="EnterpriseEngine.state.employees[${idx}].name=this.value; EnterpriseEngine.refreshSidebarControls();">
+                            <button class="btn btn-danger btn-small" onclick="EnterpriseEngine.state.employees.splice(${idx},1); EnterpriseEngine.refreshSidebarControls();">×</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
+                            <select onchange="EnterpriseEngine.state.employees[${idx}].departmentId=this.value; EnterpriseEngine.refreshSidebarControls();">${deptOpts}</select>
+                            <select onchange="EnterpriseEngine.state.employees[${idx}].positionId=this.value; EnterpriseEngine.renderSystemGrid();">${posOpts}</select>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                            <div style="display:flex; align-items:center; gap:2px; font-size:6.5pt; color:var(--ui-text-muted);">Ставка ₽/ч:<input type="number" value="${emp.rate}" style="width:55px;" oninput="EnterpriseEngine.state.employees[${idx}].rate=parseInt(this.value)||0; EnterpriseEngine.renderSystemGrid();"></div>
+                            <button class="btn btn-secondary btn-small" style="background:#2d3748; padding:1px 4px; font-size:5.5pt;" onclick="EnterpriseEngine.state.employees[${idx}].schedule={}; EnterpriseEngine.renderSystemGrid();">🗑️ Очистить</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+
+                    let label = document.createElement('label'); label.className = 'bulk-emp-label';
+                    let dName = EnterpriseEngine.state.departments.find(d=>d.id===emp.departmentId)?.name || 'Резерв';
+                    label.innerHTML = `<input type="checkbox" class="target-bulk-checkbox" value="${emp.id}"> <span>${emp.name} [${dName}]</span>`;
+                    bulkZone.appendChild(label);
+                });
+            },
+
+            bindGridCellsToContextPopover: function() {
+                const cells = document.querySelectorAll('.cell-clickable-shift');
+                const popover = document.getElementById('gridShiftCellPopover');
+
+                cells.forEach(cell => {
+                    cell.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        let empId = parseInt(cell.getAttribute('data-empid'));
+                        let day = parseInt(cell.getAttribute('data-day'));
+
+                        EnterpriseEngine.state.runtime.targetCell = { employeeId: empId, day: day };
+                        popover.innerHTML = '';
+
+                        Object.keys(EnterpriseEngine.state.shifts).forEach(key => {
+                            let b = document.createElement('button');
+                            b.innerText = `[${key}] ${EnterpriseEngine.state.shifts[key].name}`;
+                            b.onclick = () => {
+                                let targetEmp = EnterpriseEngine.state.employees.find(x => x.id === empId);
+                                targetEmp.schedule[day] = { code: key, isCustom: false };
+                                EnterpriseEngine.renderSystemGrid();
+                                EnterpriseEngine.log(`Изменен день ${day} у сотрудника ID:${empId} на код [${key}]`);
+                            };
+                            popover.appendChild(b);
+                        });
+
+                        let customB = document.createElement('button');
+                        customB.innerHTML = `⚙️ <b>Задать точные часы...</b>`;
+                        customB.style.borderTop = "2px solid #eaedf1"; customB.style.color = "#ff007f";
+                        customB.onclick = () => { EnterpriseEngine.actions.openOverrideModal(empId, day); };
+                        popover.appendChild(customB);
+
+                        popover.style.left = e.pageX + 'px';
+                        popover.style.top = e.pageY + 'px';
+                        popover.style.display = 'block';
+                    });
+                });
+            }
+        },
+
+        actions: {
+            toggleSidebarPanel: function() {
+                const sidebar = document.getElementById('sidebarNavElement');
+                EnterpriseEngine.state.runtime.collapsed = !EnterpriseEngine.state.runtime.collapsed;
+                if(EnterpriseEngine.state.runtime.collapsed) sidebar.classList.add('collapsed'); else sidebar.classList.remove('collapsed');
+            },
+
+            setOrientation: function(orientation) {
+                EnterpriseEngine.setOrientation(orientation);
+            },
+
+            changeCalendarPeriod: function() {
+                EnterpriseEngine.state.month = parseInt(document.getElementById('glMonthValue').value);
+                EnterpriseEngine.state.year = parseInt(document.getElementById('glYearValue').value) || 2026;
+                EnterpriseEngine.refreshSidebarControls();
+                EnterpriseEngine.log(`Период переключен на ${EnterpriseEngine.state.month+1}/${EnterpriseEngine.state.year}`);
+            },
+
+            togglePrintColumns: function() {
+                EnterpriseEngine.state.printLayers.showTotal = document.getElementById('chkShowTotalCol').checked;
+                EnterpriseEngine.state.printLayers.showNight = document.getElementById('chkShowNightCol').checked;
+                EnterpriseEngine.state.printLayers.showFot = document.getElementById('chkShowFotCol').checked;
+                EnterpriseEngine.renderSystemGrid();
+            },
+
+            toggleStaffPrintRow: function(empId, isChecked) {
+                EnterpriseEngine.state.printLayers.allowedEmployees[empId] = isChecked;
+                EnterpriseEngine.renderSystemGrid();
+            },
+
+            toggleAllStaffPrintScope: function() {
+                let masterChecked = document.getElementById('chkPrintAllStaff').checked;
+                EnterpriseEngine.state.employees.forEach(e => {
+                    EnterpriseEngine.state.printLayers.allowedEmployees[e.id] = masterChecked;
+                });
+                EnterpriseEngine.ui.renderPrintSelectorPanel();
+                EnterpriseEngine.renderSystemGrid();
+            },
+
+            addNewPosition: function() {
+                EnterpriseEngine.state.positions.push({ id: "p_" + Date.now(), name: "Новая штатная должность" });
+                EnterpriseEngine.refreshSidebarControls();
+            },
+
+            addNewDepartment: function() {
+                EnterpriseEngine.state.departments.push({ id: "d_" + Date.now(), name: "Новое подразделение/Точка", minStaff: 1, maxStaff: 5, maxHours: 168 });
+                EnterpriseEngine.refreshSidebarControls();
+            },
+
+            addNewEmployee: function() {
+                let id = Date.now();
+                EnterpriseEngine.state.employees.push({ id: id, name: "Новый сотрудник фирмы", departmentId: "", positionId: "", rate: 300, schedule: {} });
+                EnterpriseEngine.state.printLayers.allowedEmployees[id] = true;
+                EnterpriseEngine.refreshSidebarControls();
+            },
+
+            addNewCustomPattern: function() {
+                let name = prompt("Введите название паттерна:", "Смена 3/3"); if(!name) return;
+                let seqString = prompt("Укажите чередование кодов через запятую (напр: Д,Д,Н,В,В):", "Д,Д,В,В"); if(!seqString) return;
+                let seq = seqString.split(',').map(s => s.trim().toUpperCase());
+
+                EnterpriseEngine.state.patterns.push({ id: "pt_" + Date.now(), name: name, sequence: seq });
+                EnterpriseEngine.refreshSidebarControls();
+                EnterpriseEngine.log(`Создан паттерн: ${name}`);
+            },
+
+            executeBulkPatternDeployment: function() {
+                let patternId = document.getElementById('bulkPatternSelectElement').value;
+                let startFromDay = parseInt(document.getElementById('bulkTargetStartDay').value) || 1;
+                let activePattern = EnterpriseEngine.state.patterns.find(p => p.id === patternId);
+
+                if(!activePattern) return alert("Ошибка: Создайте или выберите паттерн!");
+
+                let selectedBoxes = document.querySelectorAll('.target-bulk-checkbox:checked');
+                if(selectedBoxes.length === 0) return alert("Отметьте галочками сотрудников в списке выше!");
+
+                let totalDaysInCurrentMonth = EnterpriseEngine.getDaysInMonth();
+                let patternCycleLength = activePattern.sequence.length;
+
+                selectedBoxes.forEach(box => {
+                    let empId = parseInt(box.value);
+                    let empProfile = EnterpriseEngine.state.employees.find(e => e.id === empId);
+                    if(empProfile) {
+                        for (let currentDay = startFromDay; currentDay <= totalDaysInCurrentMonth; currentDay++) {
+                            let sequencePointer = (currentDay - startFromDay) % patternCycleLength;
+                            let assignedCode = activePattern.sequence[sequencePointer];
+                            empProfile.schedule[currentDay] = { code: assignedCode, isCustom: false };
+                        }
+                    }
+                });
+
+                EnterpriseEngine.log(`Цикл "${activePattern.name}" массово проставлен.`);
+                EnterpriseEngine.renderSystemGrid();
+            },
+
+            openOverrideModal: function(empId, day) {
+                let emp = EnterpriseEngine.state.employees.find(x => x.id === empId);
+                let currentCell = emp.schedule[day] || { code: 'В', isCustom: false };
+
+                document.getElementById('modalInfoLabel').innerText = `Работник: ${emp.name} | Число: ${day}`;
+
+                if (currentCell.isCustom) {
+                    document.getElementById('mdInStart').value = currentCell.start;
+                    document.getElementById('mdInEnd').value = currentCell.end;
+                    document.getElementById('mdInBreak').value = currentCell.break;
+                } else {
+                    let dShift = EnterpriseEngine.state.shifts[currentCell.code] || { start: '08:00', end: '20:00', break: 1 };
+                    document.getElementById('mdInStart').value = dShift.start;
+                    document.getElementById('mdInEnd').value = dShift.end;
+                    document.getElementById('mdInBreak').value = dShift.break;
+                }
+
+                document.getElementById('modalOverlayMask').style.display = 'block';
+                document.getElementById('cellCustomTimeOverrideModal').style.display = 'flex';
+            },
+
+            closeOverrideModal: function() {
+                document.getElementById('modalOverlayMask').style.display = 'none';
+                document.getElementById('cellCustomTimeOverrideModal').style.display = 'none';
+            },
+
+            saveOverrideModalData: function() {
+                let t = EnterpriseEngine.state.runtime.targetCell; if(!t) return;
+                let emp = EnterpriseEngine.state.employees.find(x => x.id === t.employeeId);
+
+                if(emp) {
+                    let s = document.getElementById('mdInStart').value.trim();
+                    let e = document.getElementById('mdInEnd').value.trim();
+                    let b = parseFloat(document.getElementById('mdInBreak').value) || 0;
+
+                    emp.schedule[t.day] = { code: '★', isCustom: true, start: s, end: e, break: b };
+                }
+
+                this.closeOverrideModal();
+                EnterpriseEngine.renderSystemGrid();
+            },
+
+            zoomCanvas: function(delta) {
+                EnterpriseEngine.zoomCanvas(delta);
+            },
+
+            resetZoom: function() {
+                EnterpriseEngine.resetZoom();
+            },
+
+            runChecklistValidation: function() {
+                EnterpriseEngine.runChecklistValidation();
+            },
+
+            sendScheduleToTelegram: function() {
+                const token = document.getElementById('tgBotToken').value.trim();
+                const chatId = document.getElementById('tgChatId').value.trim();
+
+                if(!token || !chatId || token.includes('FakeToken')) {
+                    EnterpriseEngine.log("[ERROR] Заполните корректные Token и Chat ID в сайдбаре!");
+                    alert("Ошибка: Необходимы валидные учетные данные Telegram Bot API!");
+                    return;
+                }
+
+                EnterpriseEngine.log("[TELEGRAM] Формирование финансового пакета метаданных...");
+
+                let text = `📦 *NEURAL_ARCHITECT_PREMIUM++* \nСводный отчет по ФОТ фабрики:\n\n`;
+                EnterpriseEngine.state.departments.forEach(d => {
+                    let deptFot = 0;
+                    let deptHrs = 0;
+                    let deptStaff = EnterpriseEngine.state.employees.filter(e => e.departmentId === d.id);
+                    deptStaff.forEach(emp => {
+                        let eHrs = 0;
+                        for (let day = 1; day <= 31; day++) {
+                            let cell = emp.schedule[day];
+                            if (cell) {
+                                if (cell.isCustom) {
+                                    eHrs += EnterpriseEngine.calculateHoursEngine(cell.start, cell.end, cell.break).total;
+                                } else {
+                                    let sh = EnterpriseEngine.state.shifts[cell.code];
+                                    if (sh) eHrs += EnterpriseEngine.calculateHoursEngine(sh.start, sh.end, sh.break).total;
+                                }
+                            }
+                        }
+                        deptHrs += eHrs;
+                        deptFot += Math.round(eHrs * emp.rate);
+                    });
+                    text += `🏢 *${d.name}* | Часов: ${deptHrs} | ФОТ: ${deptFot}₽\n`;
+                });
+                text += `\nАвтор ядра: @asv_prod\nСгенерировано автоматически.`;
+
+                let url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+                })
+                .then(response => {
+                    if(response.ok) {
+                        EnterpriseEngine.log("[SUCCESS] Данные отправлены в Telegram успешно!");
+                        alert("Успешно! Сводная аналитика отправлена в чат группы.");
+                    } else {
+                        EnterpriseEngine.log(`[ERROR] Ошибка сервера Telegram: ${response.status}`);
+                        alert("Сервер Telegram отклонил запрос. Проверьте Token/Chat ID.");
+                    }
+                })
+                .catch(err => {
+                    EnterpriseEngine.log(`[ERROR] Сбой сетевого соединения шлюза: ${err}`);
+                });
+            }
+        }
+    };
+
+    window.onload = () => EnterpriseEngine.init();
+</script>
+</body>
+</html>
+```
